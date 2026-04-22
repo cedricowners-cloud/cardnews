@@ -1,0 +1,475 @@
+:root {
+  --bg: #0f1115;
+  --panel: #171a21;
+  --panel-2: #0b0d12;
+  --border: #262a33;
+  --text: #e6e8ec;
+  --text-dim: #9aa0aa;
+  --accent: #1E4FFF;
+  --highlight-color: #1E4FFF;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+}
+
+/* ---------- Header ---------- */
+
+header {
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+header h1 { margin: 0; font-size: 18px; font-weight: 700; }
+
+.settings {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.settings label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.settings input[type="text"] {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  min-width: 160px;
+}
+.settings input[type="color"] {
+  width: 36px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-2);
+  cursor: pointer;
+  padding: 2px;
+}
+
+/* ---------- Layout ---------- */
+
+main {
+  display: grid;
+  grid-template-columns: minmax(400px, 1fr) minmax(440px, 1fr);
+  gap: 16px;
+  padding: 16px;
+  height: calc(100vh - 63px);
+  overflow: hidden;
+}
+
+section.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-header h2 { margin: 0; font-size: 14px; font-weight: 600; }
+
+.editor-scroll {
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 4px;
+}
+
+/* ---------- Slide card ---------- */
+
+.slide-card {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.slide-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.card-header { display: flex; align-items: center; gap: 8px; }
+.card-num {
+  background: var(--border);
+  color: var(--text);
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+.slide-card.active .card-num { background: var(--accent); }
+.card-type-select {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.card-spacer { flex: 1; }
+
+.icon-btn {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid transparent;
+  cursor: pointer;
+  padding: 3px 7px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+.icon-btn:hover {
+  color: var(--text);
+  background: var(--border);
+}
+
+.field-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 6px;
+}
+
+/* ---------- Format toolbar & editable ---------- */
+
+.format-toolbar { display: flex; gap: 4px; margin-top: 2px; }
+.format-toolbar button {
+  background: var(--border);
+  color: var(--text);
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+}
+.format-toolbar button:hover { background: #333a46; }
+.format-toolbar button.hl { background: var(--highlight-color); color: #fff; }
+.format-toolbar button.hl:hover { filter: brightness(1.1); }
+
+.editable {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  min-height: 34px;
+  outline: none;
+  line-height: 1.6;
+  color: var(--text);
+  font-family: inherit;
+  width: 100%;
+  word-break: break-word;
+}
+.editable:focus { border-color: var(--accent); }
+.editable[data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: #555;
+  pointer-events: none;
+}
+.editable .hl-mark {
+  background: var(--highlight-color);
+  color: white;
+  padding: 0;
+  border-radius: 2px;
+}
+.editable b, .editable strong { font-weight: 900; }
+.body-editable { min-height: 80px; }
+
+/* Distinct selection color so the text selection (orange) is clearly different
+   from the highlight mark (blue). Otherwise both look blue and it's easy to
+   mistake a selection overlay for a persistent highlight. */
+.editable ::selection,
+.editable::selection {
+  background: rgba(255, 170, 40, 0.45);
+  color: inherit;
+}
+
+/* ---------- Image row ---------- */
+
+.image-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 8px;
+}
+.image-thumb-sm {
+  width: 30px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+/* ---------- Buttons ---------- */
+
+.small-btn {
+  background: var(--border);
+  color: var(--text);
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.small-btn:hover { background: #333a46; }
+
+.add-slide-btn {
+  background: transparent;
+  color: var(--accent);
+  border: 1px dashed var(--accent);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+  margin-top: 4px;
+  font-weight: 500;
+}
+.add-slide-btn:hover { background: rgba(30, 79, 255, 0.08); }
+
+button.btn {
+  background: var(--border);
+  color: var(--text);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+button.btn:hover { background: #333a46; }
+button.btn.primary { background: var(--accent); color: white; }
+button.btn.primary:hover { background: #3a66ff; }
+
+/* ---------- Preview ---------- */
+
+.preview-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--panel-2);
+  border-radius: 8px;
+  padding: 12px;
+}
+canvas#canvas {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  background: white;
+}
+
+.controls, .downloads {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+.indicator {
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 60px;
+  text-align: center;
+}
+
+input[type="file"] { display: none; }
+
+/* ---------- Modal ---------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.modal-backdrop.show { display: flex; }
+
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  width: 90%;
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.modal h3 { margin: 0; font-size: 16px; }
+.modal p { margin: 0; font-size: 12px; color: var(--text-dim); }
+.modal textarea {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 220px;
+  line-height: 1.6;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal.wide { max-width: 640px; max-height: 90vh; overflow-y: auto; }
+.modal .hint { font-weight: 400; text-transform: none; letter-spacing: 0; }
+.modal .link { color: var(--accent); }
+.modal input[type="password"].monospace {
+  font-family: monospace;
+  font-size: 12px;
+}
+.modal select.editable { padding: 8px 10px; }
+#ai-status { font-size: 12px; color: var(--text-dim); min-height: 18px; }
+
+/* ---------- Brand modal widgets ---------- */
+
+.radio-row { display: flex; gap: 8px; }
+.radio-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  user-select: none;
+}
+.radio-btn input { display: none; }
+.radio-btn:has(input:checked) {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.position-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 42px);
+  gap: 4px;
+}
+.position-grid button {
+  width: 42px;
+  height: 42px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 18px;
+  font-family: inherit;
+}
+.position-grid button:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.position-grid button.selected {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+/* When "above heading" mode is on, only the horizontal axis of the grid
+   matters — dim the grid so the visual cue reinforces that the selected
+   button's vertical component is ignored. */
+.position-grid.horizontal-only button {
+  opacity: 0.6;
+}
+.position-grid.horizontal-only button.selected {
+  opacity: 1;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+.checkbox-row input {
+  margin: 0;
+  cursor: pointer;
+}
+.checkbox-row .hint {
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.brand-preview {
+  padding: 12px;
+  background: #333;
+  border-radius: 6px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.brand-preview img {
+  max-height: 60px;
+  max-width: 100%;
+  object-fit: contain;
+}
+.brand-preview.empty {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+#brand-text-section, #brand-image-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>카드뉴스 생성기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+<body>
+
+<header>
+  <h1>카드뉴스 생성기</h1>
+  <div class="settings">
+    <button class="btn" id="brand-settings-btn">🎨 브랜드</button>
+    <button class="btn" id="design-settings-btn">⚙️ 디자인</button>
+    <label>하이라이트 색 <input type="color" id="highlight-color" value="#1E4FFF"></label>
+    <button class="btn primary" id="ai-convert-btn">✨ AI 변환</button>
+    <button class="btn" id="bulk-import">대본 붙여넣기</button>
+    <button class="btn" id="load-sample">예시 불러오기</button>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="panel-header">
+      <h2>슬라이드 편집</h2>
+    </div>
+    <div class="editor-scroll" id="slide-editor"></div>
+    <button class="add-slide-btn" id="add-slide">+ 슬라이드 추가</button>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>미리보기</h2>
+      <span class="indicator" id="indicator">0 / 0</span>
+    </div>
+    <div class="preview-wrap">
+      <canvas id="canvas" width="1080" height="1350"></canvas>
+    </div>
+    <div class="controls">
+      <button class="btn" id="prev">‹ 이전</button>
+      <button class="btn" id="next">다음 ›</button>
+    </div>
+    <div class="downloads">
+      <button class="btn" id="download-current">현재 슬라이드 PNG</button>
+      <button class="btn primary" id="download-all">전체 ZIP 다운로드</button>
+    </div>
+  </section>
+</main>
+
+<div class="modal-backdrop" id="import-modal">
+  <div class="modal">
+    <h3>대본 붙여넣기</h3>
+    <p>빈 줄(엔터 두 번) 기준으로 자동 분할됩니다. 분할 후 각 슬라이드의 타입과 하이라이트를 편집하세요.</p>
+    <textarea id="import-text" placeholder="릴스 대본을 여기 붙여넣으세요...&#10;&#10;빈 줄로 구분된 문단마다 한 장의 슬라이드가 만들어집니다."></textarea>
+    <div class="modal-actions">
+      <button class="btn" id="import-cancel">취소</button>
+      <button class="btn primary" id="import-confirm">가져오기</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="ai-modal">
+  <div class="modal wide">
+    <h3>✨ AI 대본 변환</h3>
+    <p>릴스/쇼츠 대본을 카드뉴스 슬라이드로 자동 변환합니다. 본인의 API 키가 필요합니다.</p>
+
+    <div class="field-label" style="margin:0;">AI 제공사</div>
+    <select id="api-provider" class="editable">
+      <option value="anthropic">Anthropic Claude</option>
+      <option value="openai">OpenAI GPT</option>
+      <option value="google">Google Gemini</option>
+    </select>
+
+    <div class="field-label" style="margin:0;">
+      API 키
+      <span class="hint">
+        (<a id="key-help-link" href="#" target="_blank" class="link">키 발급받기</a> · 브라우저 localStorage에만 저장됨)
+      </span>
+    </div>
+    <input type="password" id="api-key" placeholder="sk-ant-api03-..." class="editable monospace">
+
+    <div class="field-label" style="margin:0;">모델</div>
+    <select id="api-model" class="editable"></select>
+
+    <div class="field-label" style="margin:0;">대본</div>
+    <textarea id="ai-script" placeholder="릴스/쇼츠 대본 전체를 그대로 붙여넣으세요. AI가 자동으로 커버/섹션/본문으로 나누고 하이라이트·볼드를 배치합니다."></textarea>
+
+    <div id="ai-status"></div>
+
+    <div class="modal-actions">
+      <button class="btn" id="ai-cancel">취소</button>
+      <button class="btn primary" id="ai-run">변환하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="design-modal">
+  <div class="modal wide">
+    <h3>⚙️ 디자인 설정</h3>
+    <p>글자 크기와 기본 배경을 조정합니다.</p>
+
+    <div class="field-label" style="margin:0;">글자 크기 배율 <span class="hint" id="font-scale-display">100%</span></div>
+    <input type="range" id="font-scale" min="0.7" max="1.5" step="0.05">
+
+    <div class="field-label" style="margin:0;">기본 배경 유형</div>
+    <div class="radio-row">
+      <label class="radio-btn"><input type="radio" name="bg-type" value="solid"><span>단색</span></label>
+      <label class="radio-btn"><input type="radio" name="bg-type" value="gradient"><span>그라디언트</span></label>
+      <label class="radio-btn"><input type="radio" name="bg-type" value="dots"><span>도트</span></label>
+      <label class="radio-btn"><input type="radio" name="bg-type" value="paper"><span>종이</span></label>
+    </div>
+
+    <div class="field-label" style="margin:0;">배경 색</div>
+    <input type="color" id="bg-color" class="editable" style="width:80px; height:36px; padding:2px;">
+
+    <div id="bg-color2-section" style="display:none;">
+      <div class="field-label" style="margin:0;">그라디언트 두 번째 색</div>
+      <input type="color" id="bg-color2" class="editable" style="width:80px; height:36px; padding:2px;">
+    </div>
+
+    <div id="bg-gradient-dir-section" style="display:none;">
+      <div class="field-label" style="margin:0;">그라디언트 방향</div>
+      <select id="bg-gradient-dir" class="editable">
+        <option value="top-bottom">위 → 아래</option>
+        <option value="bottom-top">아래 → 위</option>
+        <option value="left-right">왼쪽 → 오른쪽</option>
+        <option value="right-left">오른쪽 → 왼쪽</option>
+        <option value="diagonal">대각선 (왼쪽 위 → 오른쪽 아래)</option>
+      </select>
+    </div>
+
+    <p class="hint" style="font-size:11px;">배경이 이미지로 설정된 슬라이드는 이 설정 대신 해당 이미지가 사용됩니다.</p>
+
+    <div class="field-label" style="margin:0;">내보내기 크기 <span class="hint">(클수록 선명)</span></div>
+    <select id="export-scale" class="editable">
+      <option value="1">1080×1350 (인스타 표준)</option>
+      <option value="2" selected>2160×2700 (2배, 권장 — 인스타도 압축 후 더 선명)</option>
+      <option value="3">3240×4050 (3배, 최고 품질)</option>
+    </select>
+
+    <div class="modal-actions">
+      <button class="btn primary" id="design-close-btn">완료</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="brand-modal">
+  <div class="modal wide">
+    <h3>🎨 브랜드 설정</h3>
+    <p>브랜드명 또는 로고 이미지와 슬라이드 내 위치를 설정합니다.</p>
+
+    <div class="field-label" style="margin:0;">브랜드 유형</div>
+    <div class="radio-row">
+      <label class="radio-btn"><input type="radio" name="brand-type" value="text"><span>텍스트</span></label>
+      <label class="radio-btn"><input type="radio" name="brand-type" value="image"><span>로고 이미지</span></label>
+    </div>
+
+    <div id="brand-text-section">
+      <div class="field-label" style="margin:0;">브랜드 텍스트 <span class="hint">(엔터로 줄바꿈)</span></div>
+      <textarea id="brand-text" rows="2" style="min-height: 60px;"></textarea>
+      <div class="field-label" style="margin:0;">글자 크기</div>
+      <input type="number" id="brand-text-size" class="editable" min="12" max="80">
+    </div>
+
+    <div id="brand-image-section" style="display:none;">
+      <div class="field-label" style="margin:0;">로고 이미지</div>
+      <div id="brand-image-preview-wrap" class="brand-preview empty">선택된 이미지 없음</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" id="brand-image-upload-btn">이미지 선택</button>
+        <button class="btn" id="brand-image-remove-btn">제거</button>
+      </div>
+      <div class="field-label" style="margin:0;">크기 <span id="brand-image-size-display">15%</span></div>
+      <input type="range" id="brand-image-size" min="5" max="50">
+    </div>
+
+    <div class="field-label" style="margin:0;">커버 슬라이드 — 브랜드 위치</div>
+    <label class="checkbox-row">
+      <input type="checkbox" id="brand-cover-above-heading">
+      <span>제목 바로 위에 배치 <span class="hint">(세로는 자동, 가로는 아래 정렬만 사용)</span></span>
+    </label>
+    <div class="position-grid" id="cover-pos-grid"></div>
+
+    <div class="field-label" style="margin:0;">본문·섹션 슬라이드 — 브랜드 위치</div>
+    <div class="position-grid" id="body-pos-grid"></div>
+
+    <div class="modal-actions">
+      <button class="btn primary" id="brand-close-btn">완료</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept="image/*">
+<input type="file" id="brand-file-input" accept="image/*">
+
+<script src="app.js" defer></script>
+</body>
+</html>
