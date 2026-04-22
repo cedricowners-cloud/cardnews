@@ -9,7 +9,7 @@ const state = {
   currentIdx: 0,
   brand: {
     type: 'text',
-    text: 'WorkHack Studio',
+    text: '브랜드명 입력',
     textSize: 24,
     image: null,
     imageSrc: null,
