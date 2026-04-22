@@ -15,7 +15,7 @@ const state = {
     imageSrc: null,
     imageSize: 15,
     coverPosition: 'middle-left',
-    coverAboveHeading: false,
+    coverAboveHeading: true,
     bodyPosition: 'top-right',
   },
   highlightColor: '#1E4FFF',
