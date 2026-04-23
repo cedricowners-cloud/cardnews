@@ -122,12 +122,15 @@
           <span>굵게</span>
         </label>
 
-        <div class="field-label" style="margin:0;">이미지 크기</div>
-        <select id="profile-size" class="editable">
-          <option value="500">500 × 500</option>
-          <option value="1000" selected>1000 × 1000</option>
-          <option value="1500">1500 × 1500</option>
-        </select>
+        <div class="field-label" style="margin:0;">이미지 크기 <span class="hint">(px, 정사각형)</span></div>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <input type="number" id="profile-size" class="editable" min="50" max="3000" step="10" style="width:110px;">
+          <button class="small-btn" data-size="174" type="button">174</button>
+          <button class="small-btn" data-size="250" type="button">250</button>
+          <button class="small-btn" data-size="500" type="button">500</button>
+          <button class="small-btn" data-size="1000" type="button">1000</button>
+          <button class="small-btn" data-size="1500" type="button">1500</button>
+        </div>
       </div>
 
       <div class="profile-preview-wrap">

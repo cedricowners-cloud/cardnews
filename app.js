@@ -994,9 +994,19 @@ $('#profile-bold').addEventListener('change', e => {
   profileState.bold = e.target.checked;
   saveProfileSettings(); renderProfilePreview();
 });
-$('#profile-size').addEventListener('change', e => {
-  profileState.size = parseInt(e.target.value, 10) || 1000;
+$('#profile-size').addEventListener('input', e => {
+  const v = parseInt(e.target.value, 10);
+  if (!v || v < 50) return;
+  profileState.size = Math.min(3000, v);
   saveProfileSettings();
+});
+document.querySelectorAll('button[data-size]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const v = parseInt(btn.dataset.size, 10);
+    profileState.size = v;
+    $('#profile-size').value = v;
+    saveProfileSettings();
+  });
 });
 
 /* ---------- Design settings modal ---------- */
