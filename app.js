@@ -893,6 +893,112 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') $('#next').click();
 });
 
+/* ---------- Profile image modal ---------- */
+
+const profileState = {
+  bgColor: '#03C75A',
+  text: '프로필',
+  textColor: '#ffffff',
+  fontSize: 50, // percentage of image size
+  bold: true,
+  size: 1000,
+};
+
+function renderProfileTo(canvas, targetSize) {
+  canvas.width = targetSize;
+  canvas.height = targetSize;
+  const c = canvas.getContext('2d');
+  c.imageSmoothingEnabled = true;
+  c.imageSmoothingQuality = 'high';
+
+  c.fillStyle = profileState.bgColor;
+  c.fillRect(0, 0, targetSize, targetSize);
+
+  const text = profileState.text;
+  if (!text || !text.trim()) return;
+
+  const fontPx = (profileState.fontSize / 100) * targetSize;
+  const weight = profileState.bold ? 900 : 500;
+  c.font = `${weight} ${fontPx}px "Pretendard Variable", Pretendard, sans-serif`;
+  c.fillStyle = profileState.textColor;
+  c.textAlign = 'center';
+  c.textBaseline = 'middle';
+
+  const lines = text.split('\n');
+  const lineHeight = fontPx * 1.15;
+  const totalHeight = (lines.length - 1) * lineHeight;
+  const startY = targetSize / 2 - totalHeight / 2;
+
+  lines.forEach((line, i) => {
+    c.fillText(line, targetSize / 2, startY + i * lineHeight);
+  });
+}
+
+function renderProfilePreview() {
+  renderProfileTo($('#profile-preview'), 500);
+}
+
+function downloadProfile() {
+  const canvas = document.createElement('canvas');
+  renderProfileTo(canvas, profileState.size);
+  canvas.toBlob(blob => {
+    triggerDownload(blob, `profile-${Date.now()}.png`);
+  }, 'image/png');
+}
+
+function saveProfileSettings() {
+  try { localStorage.setItem('cardnews_profile', JSON.stringify(profileState)); } catch {}
+}
+
+function loadProfileSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('cardnews_profile') || '{}');
+    Object.assign(profileState, saved);
+  } catch {}
+}
+
+function openProfileModal() {
+  $('#profile-bg-color').value = profileState.bgColor;
+  $('#profile-text').value = profileState.text;
+  $('#profile-text-color').value = profileState.textColor;
+  $('#profile-font-size').value = profileState.fontSize;
+  $('#profile-font-size-display').textContent = profileState.fontSize + '%';
+  $('#profile-bold').checked = profileState.bold;
+  $('#profile-size').value = String(profileState.size);
+  renderProfilePreview();
+  $('#profile-modal').classList.add('show');
+}
+
+$('#profile-modal-btn').addEventListener('click', openProfileModal);
+$('#profile-close-btn').addEventListener('click', () => $('#profile-modal').classList.remove('show'));
+$('#profile-download-btn').addEventListener('click', downloadProfile);
+
+$('#profile-bg-color').addEventListener('input', e => {
+  profileState.bgColor = e.target.value;
+  saveProfileSettings(); renderProfilePreview();
+});
+$('#profile-text').addEventListener('input', e => {
+  profileState.text = e.target.value;
+  saveProfileSettings(); renderProfilePreview();
+});
+$('#profile-text-color').addEventListener('input', e => {
+  profileState.textColor = e.target.value;
+  saveProfileSettings(); renderProfilePreview();
+});
+$('#profile-font-size').addEventListener('input', e => {
+  profileState.fontSize = parseInt(e.target.value, 10) || 50;
+  $('#profile-font-size-display').textContent = profileState.fontSize + '%';
+  saveProfileSettings(); renderProfilePreview();
+});
+$('#profile-bold').addEventListener('change', e => {
+  profileState.bold = e.target.checked;
+  saveProfileSettings(); renderProfilePreview();
+});
+$('#profile-size').addEventListener('change', e => {
+  profileState.size = parseInt(e.target.value, 10) || 1000;
+  saveProfileSettings();
+});
+
 /* ---------- Design settings modal ---------- */
 
 function toggleDesignBgFields() {
@@ -1459,5 +1565,6 @@ $('#api-provider').addEventListener('change', onProviderChange);
   document.documentElement.style.setProperty('--highlight-color', state.highlightColor);
   loadBrandSettings();
   loadDesignSettings();
+  loadProfileSettings();
   loadSample();
 })();

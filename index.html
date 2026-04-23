@@ -15,6 +15,7 @@
   <div class="settings">
     <button class="btn" id="brand-settings-btn">🎨 브랜드</button>
     <button class="btn" id="design-settings-btn">⚙️ 디자인</button>
+    <button class="btn" id="profile-modal-btn">👤 프로필 이미지</button>
     <label>하이라이트 색 <input type="color" id="highlight-color" value="#1E4FFF"></label>
     <button class="btn primary" id="ai-convert-btn">✨ AI 변환</button>
     <button class="btn" id="bulk-import">대본 붙여넣기</button>
@@ -93,6 +94,51 @@
     <div class="modal-actions">
       <button class="btn" id="ai-cancel">취소</button>
       <button class="btn primary" id="ai-run">변환하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="profile-modal">
+  <div class="modal wide">
+    <h3>👤 프로필 이미지 생성</h3>
+    <p>단색 배경에 텍스트만 들어간 심플한 프로필 이미지를 만듭니다.</p>
+
+    <div class="profile-modal-body">
+      <div class="profile-fields">
+        <div class="field-label" style="margin:0;">배경색</div>
+        <input type="color" id="profile-bg-color" class="editable" style="width:80px; height:36px; padding:2px;">
+
+        <div class="field-label" style="margin:0;">글자 <span class="hint">(엔터로 줄바꿈)</span></div>
+        <textarea id="profile-text" rows="3" style="min-height: 70px;"></textarea>
+
+        <div class="field-label" style="margin:0;">글자색</div>
+        <input type="color" id="profile-text-color" class="editable" style="width:80px; height:36px; padding:2px;">
+
+        <div class="field-label" style="margin:0;">글자 크기 <span class="hint" id="profile-font-size-display">50%</span></div>
+        <input type="range" id="profile-font-size" min="5" max="90" step="1">
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="profile-bold">
+          <span>굵게</span>
+        </label>
+
+        <div class="field-label" style="margin:0;">이미지 크기</div>
+        <select id="profile-size" class="editable">
+          <option value="500">500 × 500</option>
+          <option value="1000" selected>1000 × 1000</option>
+          <option value="1500">1500 × 1500</option>
+        </select>
+      </div>
+
+      <div class="profile-preview-wrap">
+        <div class="field-label" style="margin:0;">미리보기</div>
+        <canvas id="profile-preview" width="500" height="500"></canvas>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" id="profile-close-btn">닫기</button>
+      <button class="btn primary" id="profile-download-btn">PNG 다운로드</button>
     </div>
   </div>
 </div>
