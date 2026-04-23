@@ -498,7 +498,14 @@ input[type="file"] { display: none; }
 #profile-preview {
   width: 260px;
   height: 260px;
-  background: #fff;
+  /* Transparent so rounded corners of the generated image reveal the modal
+     background, giving a visual cue of the transparent corner area. */
+  background:
+    linear-gradient(45deg, rgba(255,255,255,0.04) 25%, transparent 25%) 0 0/20px 20px,
+    linear-gradient(-45deg, rgba(255,255,255,0.04) 25%, transparent 25%) 0 10px/20px 20px,
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.04) 75%) 10px -10px/20px 20px,
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.04) 75%) 10px 0/20px 20px,
+    #0b0d12;
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }

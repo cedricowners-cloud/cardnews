@@ -902,6 +902,7 @@ const profileState = {
   fontSize: 50, // percentage of image size
   bold: true,
   size: 1000,
+  radius: 22, // percentage of image size (0 = square, 50 = circle)
 };
 
 function renderProfileTo(canvas, targetSize) {
@@ -910,9 +911,17 @@ function renderProfileTo(canvas, targetSize) {
   const c = canvas.getContext('2d');
   c.imageSmoothingEnabled = true;
   c.imageSmoothingQuality = 'high';
+  c.clearRect(0, 0, targetSize, targetSize);
 
+  const radiusPx = Math.min(targetSize / 2, (profileState.radius / 100) * targetSize);
+  c.beginPath();
+  if (c.roundRect) {
+    c.roundRect(0, 0, targetSize, targetSize, radiusPx);
+  } else {
+    roundedRectPath(c, 0, 0, targetSize, targetSize, radiusPx);
+  }
   c.fillStyle = profileState.bgColor;
-  c.fillRect(0, 0, targetSize, targetSize);
+  c.fill();
 
   const text = profileState.text;
   if (!text || !text.trim()) return;
@@ -934,13 +943,38 @@ function renderProfileTo(canvas, targetSize) {
   });
 }
 
+function roundedRectPath(c, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+// Render at 3× the target size internally then downscale with high-quality
+// smoothing. Crucial for small profile sizes (e.g., 174 px) where native
+// rasterization of complex Korean glyphs leaves visible aliasing.
+function renderProfileWithSupersample(canvas, targetSize) {
+  const sup = 3;
+  const big = document.createElement('canvas');
+  renderProfileTo(big, targetSize * sup);
+  canvas.width = targetSize;
+  canvas.height = targetSize;
+  const c = canvas.getContext('2d');
+  c.imageSmoothingEnabled = true;
+  c.imageSmoothingQuality = 'high';
+  c.drawImage(big, 0, 0, targetSize, targetSize);
+}
+
 function renderProfilePreview() {
-  renderProfileTo($('#profile-preview'), 500);
+  renderProfileWithSupersample($('#profile-preview'), 500);
 }
 
 function downloadProfile() {
   const canvas = document.createElement('canvas');
-  renderProfileTo(canvas, profileState.size);
+  renderProfileWithSupersample(canvas, profileState.size);
   canvas.toBlob(blob => {
     triggerDownload(blob, `profile-${Date.now()}.png`);
   }, 'image/png');
@@ -965,6 +999,8 @@ function openProfileModal() {
   $('#profile-font-size-display').textContent = profileState.fontSize + '%';
   $('#profile-bold').checked = profileState.bold;
   $('#profile-size').value = String(profileState.size);
+  $('#profile-radius').value = profileState.radius;
+  $('#profile-radius-display').textContent = profileState.radius + '%';
   renderProfilePreview();
   $('#profile-modal').classList.add('show');
 }
@@ -1007,6 +1043,11 @@ document.querySelectorAll('button[data-size]').forEach(btn => {
     $('#profile-size').value = v;
     saveProfileSettings();
   });
+});
+$('#profile-radius').addEventListener('input', e => {
+  profileState.radius = parseInt(e.target.value, 10) || 0;
+  $('#profile-radius-display').textContent = profileState.radius + '%';
+  saveProfileSettings(); renderProfilePreview();
 });
 
 /* ---------- Design settings modal ---------- */
